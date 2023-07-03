@@ -1,0 +1,126 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+import { Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import axiosInstance from "../utilities/AxiosInstance";
+
+const Product = () => {
+  const [product, setProduct] = useState([]);
+  const [editProduct, setEditProduct] = useState(null);
+
+  const [initialValues, setInitialValues] = useState({
+    product_name: "",
+    product_category: "",
+  });
+  const [image, setImage] = useState({
+    productImage: "",
+  });
+
+  const [options, setOptions] = useState([{ category_name: "", id: "" }]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productResponse = await axiosInstance.get("/product");
+        setProduct(productResponse.data);
+
+        const categoryResponse = await axiosInstance.get("/category");
+        setOptions(categoryResponse.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const deleteProduct = async (id) => {
+    try {
+      await axiosInstance.delete(`/product/${id}`);
+      setProduct(product.filter((item) => item._id !== id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const editClicked = (product) => {
+    setEditProduct(product);
+    setInitialValues({
+      product_name: product.product_name,
+      product_category: product.product_category,
+    });
+  };
+
+  const handleEdit = async (values, actions) => {
+    try {
+      const updatedProduct = { ...editProduct, ...values };
+      await axiosInstance.put(`/product/${updatedProduct._id}`, updatedProduct);
+
+      const updatedProductIndex = product.findIndex(
+        (item) => item._id === updatedProduct._id
+      );
+      const updatedProductData = { ...product[updatedProductIndex] };
+
+      updatedProductData.product_name = updatedProduct.product_name;
+      updatedProductData.product_category = updatedProduct.product_category;
+
+      const updatedProductList = [...product];
+      updatedProductList[updatedProductIndex] = updatedProductData;
+
+      setProduct(updatedProductList);
+      setEditProduct(null);
+      setInitialValues({ product_category: "", product_name: "" });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const addData = async (values, actions) => {
+    const formData = new FormData();
+    formData.append("product_name", values.product_name);
+    formData.append("product_category", values.product_category);
+    formData.append("productImage", image);
+
+    try {
+      const res = await axiosInstance.post("/product", formData);
+      const newProduct = res.data;
+
+      setProduct([...product, newProduct]);
+      setImage("");
+      setInitialValues({ product_category: "", product_name: "" });
+      actions.resetForm();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="m-5 w-full">
+      {/* Rest of your code */}
+    </div>
+  );
+};
+
+export default Product;
