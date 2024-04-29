@@ -90,3 +90,93 @@ export const request = async ({
 
   return res;
 };
+
+
+
+import { AxiosResponse } from "../types";
+import { request } from "../utils/request";
+const PrefixEndpoint = "/admin";
+
+
+export const PackageCountApi = async (id: string) => {
+    const response: AxiosResponse<any> = await request({
+      url: `${PrefixEndpoint}/users/game-package-count/${id}`,
+      method: "GET",
+    });
+    return response;
+  };
+
+  export const UsersPackageDataApi = async (id: string) => {
+    const response: AxiosResponse<any> = await request({
+      url: `${PrefixEndpoint}/users/game-packages/${id}`,
+      method: "GET",
+    });
+    return response;
+  };
+
+  export const UsersGamehistoryApi = async (id: string) => {
+    const response: AxiosResponse<any> = await request({
+      url: `${PrefixEndpoint}/users/game-history/${id}`,
+      method: "GET",
+    });
+    return response;
+  };
+
+  export const UsersSpecialGamehistoryApi = async (id: string) => {
+    const response: AxiosResponse<any> = await request({
+      url: `${PrefixEndpoint}/users/special-game-history/${id}`,
+      method: "GET",
+    });
+    return response;
+  };
+
+      import React from "react";
+import ReactDOM from "react-dom/client";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import App from "./App.tsx";
+import "./index.css";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "styled-components";
+import theme from "./utils/theme.tsx";
+import ScrollToTop from "./hooks/ScrollToTop.ts";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 0,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+      <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable
+            pauseOnHover
+            limit={3}
+          />
+          
+        <BrowserRouter>
+          <App />
+          <ScrollToTop />
+          
+        </BrowserRouter>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+
